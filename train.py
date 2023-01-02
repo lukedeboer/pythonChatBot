@@ -6,7 +6,7 @@ import torch.nn as nn
 
 from torch.utils.data import Dataset, DataLoader
 
-from ntlk_utils import tokenize, stem, bag_of_words
+from nltk_utils import tokenize, stem, bag_of_words
 
 from model import NeuralNet
 
@@ -75,7 +75,7 @@ dataset = ChatDataSet()
 train_loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = NeuralNet(input_size, hidden_size, output_size)
+model = NeuralNet(input_size, hidden_size, output_size).to(device)
 
 # loss and optimiser
 criterion = nn.CrossEntropyLoss()
@@ -98,7 +98,20 @@ for epoch in range(num_epochs):
     if (epoch +1) % 100 == 0:
         print(f'epoch {epoch+1}/{num_epochs}, loss={loss.item():.4f}')
 
-    print(f'Final loss, loss={loss.item():.4f}')
+print(f'Final loss, loss={loss.item():.4f}')
+data = {
+        "model_state": model.state_dict(),
+        "input_size": input_size,
+        "output_size": output_size,
+        "hidden_size": hidden_size,
+        "all_words": all_words,
+        "tags": tags,
+}
+
+FILE = "data.pth"
+torch.save(data, FILE)
+
+print(f'training complete. file saved to {FILE}')
 
 
 
